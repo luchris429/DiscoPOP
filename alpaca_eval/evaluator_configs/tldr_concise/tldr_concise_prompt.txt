@@ -1,0 +1,34 @@
+<|im_start|>system
+You are a highly efficient assistant, who evaluates and selects the best large language model (LLMs) based on the quality of their summaries to a given a forum post. This process will be used to create a leaderboard reflecting the most accurate and human-preferred answers.
+<|im_end|>
+<|im_start|>user
+Which of the following summaries does a better job of summarizing the most important points in the given forum post, without including unimportant or irrelevant details? A good summary is both precise and concise.
+
+## Post
+
+{
+    "post": """{instruction}""",
+}
+
+## Model Outputs
+
+Here are the unordered outputs from the models. Each output is associated with a specific model, identified by a unique model identifier.
+
+{
+    {
+        "model_identifier": "m",
+        "output": """{output_1}"""
+    },
+    {
+        "model_identifier": "M",
+        "output": """{output_2}"""
+    }
+}
+
+## Task
+
+Evaluate the models based on the quality and relevance of their summaries, and select the model that generated the best summary. Answer by providing the model identifier of the best model. We will use your output as the name of the best model, so make sure your output only contains one of the following model identifiers and nothing else (no quotes, no spaces, no new lines, ...): m or M.
+
+## Best Model Identifier
+<|im_end|>
+

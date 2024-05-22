@@ -1,0 +1,43 @@
+# Model arguments
+model_name_or_path: lvwerra/gpt2-imdb
+torch_dtype: bfloat16
+
+
+dataset_mixer:
+  ZHZisZZ/imdb_preference: 1.0
+
+dataset_splits:
+- train
+- test
+preprocessing_num_workers: 12
+
+# GPOTrainer arguments
+loss_type: epo
+bf16: true
+beta: 0.05
+do_eval: true
+evaluation_strategy: steps
+eval_steps: 128
+gradient_accumulation_steps: 8
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: False
+hub_model_id: zephyr-7b-gemma-epo
+learning_rate: 5.0e-5
+log_level: info
+logging_steps: 10
+lr_scheduler_type: cosine
+max_length: 1024
+max_prompt_length: 512
+num_train_epochs: 3
+optim: adamw_torch
+output_dir: data/gpt-2-imdb
+per_device_train_batch_size: 2
+per_device_eval_batch_size: 4
+push_to_hub: false
+max_grad_norm: 1.0
+report_to:
+- wandb
+save_strategy: "no"
+seed: 42
+warmup_ratio: 0.1

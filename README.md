@@ -58,6 +58,60 @@ To launch the evolution script:
 python3 scripts/launch_evo.py --wandb
 ```
 
+Finally, you need to install Alpaca Eval 2.0.
+Annoyingly, `alpaca_eval` uses `openai>1.5.0` and `mt-bench` uses `openai==0.28`, which is not backward compatible. Therefore we need to create a second conda environment, that is a copy of the first. 
+```shell
+conda create --name handbook_alpaca --clone handbook
+conda activate handbook_alpaca
+```
+
+Subsequently we install `alpaca_eval` as follows:
+
+```shell
+pip install alpaca-eval
+```
+I have also created an extra folder in this repo named `alpaca_eval`, where we store all the model and api config files
+
+Whenever you want to run an `mt-bench` model evaluation, you can do this with the following command:
+```shell
+conda activate handbook
+python scripts/run_evaluations.py \
+    --model-id <name_of_your_model> \
+    --model-path <path_to_model_weights_or_HF> \
+    --num-generations 1 \
+    --mt-bench \
+```
+
+Whenever you want to run an `alpaca_eval` model evaluation, you can do this with the following command:
+```shell
+conda activate handbook_alpaca
+python scripts/run_evaluations.py \
+    --model-id <name_of_your_model> \
+    --num-generations 1 \
+    --alpaca-eval \
+    --alpaca-model <path_to_your_model_config>/configs.yaml \
+    --alpaca-reference-model path_to_ref_model_config>/configs.yaml \
+    --alpaca-openai-configs <path_to_your_client_config>/openai_configs.yaml
+```
+
+## Held-Out Test Set
+
+### TL;DR
+If you want to run both togheter, We have prepared a bash scripts:
+```shell
+source scripts/train_tldr.sh 
+```
+
+```shell
+source scripts/eval_tldr.sh 
+```
+
+### IMDb
+```shell
+source scripts/train_eval_imdb.sh 
+```
+
+
 # ALIGNMENT-HANDBOOK
 
 This repo is based on the [alignment-handbook](https://github.com/huggingface/alignment-handbook) repository.

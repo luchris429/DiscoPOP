@@ -1,0 +1,5 @@
+<bos><|im_start|>system
+You are an AI assistant.<|im_end|>
+<|im_start|>user
+{instruction}<|im_end|>
+<|im_start|>assistant

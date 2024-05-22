@@ -1,0 +1,2 @@
+,win_rate,standard_error,mode,avg_length,n_wins,n_wins_base,n_draws,n_total,discrete_win_rate,length_controlled_winrate,lc_standard_error
+anonymous-zephyr-7b-g-padll,81.10228005892348,1.2079649090007623,community,1783,664,140,1,805,82.54658385093168,64.14708608760648,0.28077708104969556

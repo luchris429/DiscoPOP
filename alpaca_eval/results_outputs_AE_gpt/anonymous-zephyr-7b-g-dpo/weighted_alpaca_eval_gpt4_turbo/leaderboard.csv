@@ -1,0 +1,3 @@
+,win_rate,standard_error,mode,avg_length,n_wins,n_wins_base,n_draws,n_total,discrete_win_rate,length_controlled_winrate,lc_standard_error
+hfh4-zephyr-7b-g-dpo,11.993339034695854,0.989034138463522,community,1520,89,714,2,805,11.180124223602483,14.729136255453776,0.7145340150111057
+anonymous-zephyr-7b-g-dpo,11.233509258731319,0.9694497183391301,community,1665,82,722,1,805,10.248447204968944,12.814446160754361,0.6685456379333454

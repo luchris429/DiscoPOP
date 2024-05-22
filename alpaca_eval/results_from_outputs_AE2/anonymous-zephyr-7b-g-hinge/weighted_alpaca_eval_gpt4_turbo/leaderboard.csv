@@ -1,0 +1,2 @@
+,win_rate,standard_error,mode,avg_length,n_wins,n_wins_base,n_draws,n_total,discrete_win_rate,length_controlled_winrate,lc_standard_error
+anonymous-zephyr-7b-g-hinge,75.04850317817164,1.341120319396719,community,1525,605,194,5,804,75.55970149253731,59.67197857896207,0.4197545903176896

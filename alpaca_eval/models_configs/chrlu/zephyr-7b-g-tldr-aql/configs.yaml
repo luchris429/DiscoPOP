@@ -1,0 +1,15 @@
+anonymous_1-zephyr-7b-g-tldr-aql:
+  prompt_template: "./alpaca_eval/models_configs/anonymous_1/zephyr-7b-g-tldr-aql/prompt.txt"
+  fn_completions: "huggingface_local_completions"
+  completions_kwargs:
+    model_name: "./data/zephyr-7b-gemma-aql-tldr-small-corrected"
+    model_kwargs:
+      torch_dtype: 'bfloat16'
+    max_new_tokens: 256
+    temperature: 0.7
+    top_p: 1.0
+    batch_size: 64
+    #stopping_criteria: "\nuser"
+    do_sample: True
+  pretty_name: "Gemma 7B Zephyr SFT + AQL on TLDR"
+
