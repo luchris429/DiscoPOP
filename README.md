@@ -1,6 +1,17 @@
-# Discovering Preference Optimization Algorithms
+# Discovering Preference Optimization Algorithms with and for Large Language Models
 
-## Setup
+🤗 [Model](https://huggingface.co/SakanaAI/DiscoPOP-zephyr-7b-gemma) | 📚 [Paper](https://arxiv.org/abs/2403.13187) | 📝 [Blog](https://sakana.ai/)
+
+
+<div align="center">
+<img src="./assets/method.gif" alt="Method" title="method">
+</div>
+
+This repository contains the code for our paper "Discovering Preference Optimization Algorithms with and for Large Language Models".
+
+The code for training is largely taken and adapted from [huggingface/alignment-handbook](https://github.com/huggingface/alignment-handbook/tree/main).
+
+## Setup and Evolution
 
 To run the code in this project, first, create a Python virtual environment using e.g. Conda:
 
@@ -57,6 +68,9 @@ To launch the evolution script:
 ```shell
 python3 scripts/launch_evo.py --wandb
 ```
+## Evaluations
+
+### Chat Evals
 
 Finally, you need to install Alpaca Eval 2.0.
 Annoyingly, `alpaca_eval` uses `openai>1.5.0` and `mt-bench` uses `openai==0.28`, which is not backward compatible. Therefore we need to create a second conda environment, that is a copy of the first. 
@@ -94,10 +108,8 @@ python scripts/run_evaluations.py \
     --alpaca-openai-configs <path_to_your_client_config>/openai_configs.yaml
 ```
 
-## Held-Out Test Set
-
 ### TL;DR
-If you want to run both togheter, We have prepared a bash scripts:
+If you want to run both together, We have prepared bash scripts:
 ```shell
 source scripts/train_tldr.sh 
 ```
@@ -111,7 +123,13 @@ source scripts/eval_tldr.sh
 source scripts/train_eval_imdb.sh 
 ```
 
+## Citation
 
-# ALIGNMENT-HANDBOOK
-
-This repo is based on the [alignment-handbook](https://github.com/huggingface/alignment-handbook) repository.
+```
+@article{lu2024discopop,
+  title={Discovering Preference Optimization Algorithms with and for Large Language Models},
+  author={Lu, Chris and Holt, Samuel and Fanconi, Claudio and Chan, Alex J and Foerster, Jakob and van der Schaar, Mihaela and Lange, Robert Tjarko},
+  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  year={2024}
+}
+```
