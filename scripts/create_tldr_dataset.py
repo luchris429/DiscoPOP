@@ -1,11 +1,9 @@
-import re
+import numpy as np
+import pandas as pd
 import torch
 from datasets import load_dataset
-from torch.utils.data import DataLoader
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-import numpy as np
 from tqdm import tqdm
-import pandas as pd
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from alignment import (
     DataArguments,
@@ -38,9 +36,7 @@ set_seed(42)
 
 
 torch_dtype = (
-    model_args.torch_dtype
-    if model_args.torch_dtype in ["auto", None]
-    else getattr(torch, model_args.torch_dtype)
+    model_args.torch_dtype if model_args.torch_dtype in ["auto", None] else getattr(torch, model_args.torch_dtype)
 )
 quantization_config = get_quantization_config(model_args)
 
@@ -60,9 +56,7 @@ tokenizer.padding_side = "left"
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
-model = AutoModelForCausalLM.from_pretrained(
-    model_args.model_name_or_path, **model_kwargs
-)
+model = AutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, **model_kwargs)
 model.to("cuda")
 # Load reference model
 ref_model = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-j-6b", **model_kwargs)

@@ -20,8 +20,14 @@ import packaging.version
 
 
 REPLACE_PATTERNS = {
-    "init": (re.compile(r'^__version__\s+=\s+"([^"]+)"\s*$', re.MULTILINE), '__version__ = "VERSION"\n'),
-    "setup": (re.compile(r'^(\s*)version\s*=\s*"[^"]+",', re.MULTILINE), r'\1version="VERSION",'),
+    "init": (
+        re.compile(r'^__version__\s+=\s+"([^"]+)"\s*$', re.MULTILINE),
+        '__version__ = "VERSION"\n',
+    ),
+    "setup": (
+        re.compile(r'^(\s*)version\s*=\s*"[^"]+",', re.MULTILINE),
+        r'\1version="VERSION",',
+    ),
 }
 REPLACE_FILES = {
     "init": "src/alignment/__init__.py",
@@ -95,7 +101,11 @@ def post_release_work():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--post_release", action="store_true", help="Whether this is pre or post release.")
+    parser.add_argument(
+        "--post_release",
+        action="store_true",
+        help="Whether this is pre or post release.",
+    )
     parser.add_argument("--patch", action="store_true", help="Whether or not this is a patch release.")
     args = parser.parse_args()
     if not args.post_release:

@@ -13,22 +13,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 import logging
 import random
 import sys
-import json
 
 import torch
-import torch.nn.functional as F
 import transformers
 from transformers import AutoModelForCausalLM, set_seed
 
 from alignment import (
     DataArguments,
     DPOConfig,
+    GPOTrainer,
     H4ArgumentParser,
     ModelArguments,
-    GPOTrainer,
     apply_chat_template,
     decontaminate_humaneval,
     get_checkpoint,
@@ -73,7 +72,6 @@ def main():
         func = namespace[names[0]]
         assert callable(func), f"{func} is not callable"
 
-
     #######
     # Setup
     #######
@@ -108,7 +106,14 @@ def main():
         data_args,
         splits=data_args.dataset_splits,
         configs=data_args.dataset_configs,
-        columns_to_keep=["messages", "chosen", "rejected", "prompt", "completion", "label"],
+        columns_to_keep=[
+            "messages",
+            "chosen",
+            "rejected",
+            "prompt",
+            "completion",
+            "label",
+        ],
     )
     logger.info(
         f"Training on the following splits: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
@@ -156,7 +161,11 @@ def main():
     # Replace column names with what TRL needs, text_chosen -> chosen and text_rejected -> rejected
     for split in ["train", "test"]:
         raw_datasets[split] = raw_datasets[split].rename_columns(
-            {"text_prompt": "prompt", "text_chosen": "chosen", "text_rejected": "rejected"}
+            {
+                "text_prompt": "prompt",
+                "text_chosen": "chosen",
+                "text_rejected": "rejected",
+            }
         )
 
     # Log a few random samples from the training set:

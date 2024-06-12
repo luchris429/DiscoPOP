@@ -1,6 +1,8 @@
+from typing import Tuple
+
 import torch
 import torch.nn.functional as F
-from typing import Tuple
+
 from trl import DPOTrainer
 
 
@@ -134,9 +136,7 @@ class GPOTrainer(DPOTrainer):
         logits_variability = logits.var()
 
         # Calculate an adaptive quantile based on a moving target
-        moving_quantile = starting_quantile + quantile_adapt_rate * (
-            torch.sigmoid(logits.mean()) - starting_quantile
-        )
+        starting_quantile + quantile_adapt_rate * (torch.sigmoid(logits.mean()) - starting_quantile)
 
         # Calculate dynamic blending coefficient based on logits variability
         dynamic_blend_coeff = torch.sigmoid(logits_variability) * dynamic_blend_rate
@@ -146,9 +146,7 @@ class GPOTrainer(DPOTrainer):
         exp_loss = torch.exp(-self.beta * logits * temperature)
 
         # Blend the losses dynamically
-        losses = (
-            dynamic_blend_coeff * logistic_loss + (1 - dynamic_blend_coeff) * exp_loss
-        )
+        losses = dynamic_blend_coeff * logistic_loss + (1 - dynamic_blend_coeff) * exp_loss
         return losses
 
     def dynamic_blended_adaptive_quantile_loss(
@@ -180,9 +178,7 @@ class GPOTrainer(DPOTrainer):
         exp_loss = torch.exp(-logits * temperature)
 
         # Blend the losses dynamically
-        losses = (
-            dynamic_blend_coeff * logistic_loss + (1 - dynamic_blend_coeff) * exp_loss
-        )
+        losses = dynamic_blend_coeff * logistic_loss + (1 - dynamic_blend_coeff) * exp_loss
         return losses
 
     def adaptive_quantile_loss_old(
@@ -198,9 +194,7 @@ class GPOTrainer(DPOTrainer):
         ref_logratios = reference_chosen_logps - reference_rejected_logps
         logits = pi_logratios - ref_logratios
 
-        moving_quantile = percentile + moving_quantile_weight * (
-            torch.sigmoid(logits.mean()) - percentile
-        )
+        moving_quantile = percentile + moving_quantile_weight * (torch.sigmoid(logits.mean()) - percentile)
 
         quantile_weights = torch.sigmoid(-self.beta * (logits - moving_quantile))
 
@@ -208,9 +202,7 @@ class GPOTrainer(DPOTrainer):
         hinge_losses = torch.relu(1 - self.beta * logits)
 
         # Blend the logistic and hinge losses based on the dynamic quantile weight
-        losses = (
-            quantile_weights * logistic_losses + (1 - quantile_weights) * hinge_losses
-        )
+        losses = quantile_weights * logistic_losses + (1 - quantile_weights) * hinge_losses
         return losses
 
     def adaptive_quantile_loss(
@@ -228,9 +220,7 @@ class GPOTrainer(DPOTrainer):
 
         logits = logits * self.beta
 
-        moving_quantile = percentile + moving_quantile_weight * (
-            torch.sigmoid((logits / 0.05).mean()) - percentile
-        )
+        moving_quantile = percentile + moving_quantile_weight * (torch.sigmoid((logits / 0.05).mean()) - percentile)
 
         quantile_weights = torch.sigmoid(-(logits / 0.05 - moving_quantile))
 
@@ -238,9 +228,7 @@ class GPOTrainer(DPOTrainer):
         hinge_losses = torch.relu(1 - logits)
 
         # Blend the logistic and hinge losses based on the dynamic quantile weight
-        losses = (
-            quantile_weights * logistic_losses + (1 - quantile_weights) * hinge_losses
-        )
+        losses = quantile_weights * logistic_losses + (1 - quantile_weights) * hinge_losses
         return losses
 
     def adaptive_quantile_feedback_loss(
@@ -264,9 +252,7 @@ class GPOTrainer(DPOTrainer):
         logits_std = (logits / 0.05).std()
 
         adaptive_quantile = logits_std * torch.sigmoid(-logits / 0.05).mean()
-        adaptive_quantile += quantile_update_rate * (
-            torch.sigmoid((logits / 0.05).mean()) - adaptive_quantile
-        )
+        adaptive_quantile += quantile_update_rate * (torch.sigmoid((logits / 0.05).mean()) - adaptive_quantile)
 
         distance_from_quantile = (logits / 0.05 - adaptive_quantile).abs()
         blend_rate = torch.sigmoid(distance_scale * distance_from_quantile)
@@ -295,9 +281,7 @@ class GPOTrainer(DPOTrainer):
         logits_std = logits.std()
 
         adaptive_quantile = logits_std * torch.sigmoid(-logits).mean()
-        adaptive_quantile += quantile_update_rate * (
-            torch.sigmoid(logits.mean()) - adaptive_quantile
-        )
+        adaptive_quantile += quantile_update_rate * (torch.sigmoid(logits.mean()) - adaptive_quantile)
 
         distance_from_quantile = (logits - adaptive_quantile).abs()
         blend_rate = torch.sigmoid(distance_scale * distance_from_quantile)
@@ -359,10 +343,7 @@ class GPOTrainer(DPOTrainer):
         logistic_component = -F.logsigmoid(self.beta * logits)
         exp_component = torch.exp(-self.beta * logits)
         # Blend between logistic and exponential component based on log ratio modulation
-        losses = (
-            logistic_component * (1 - log_ratio_modulation)
-            + exp_component * log_ratio_modulation
-        )
+        losses = logistic_component * (1 - log_ratio_modulation) + exp_component * log_ratio_modulation
         return losses
 
     def log_ratio_modulated_loss(
@@ -382,10 +363,7 @@ class GPOTrainer(DPOTrainer):
         logistic_component = -F.logsigmoid(logits)
         exp_component = torch.exp(-logits)
         # Blend between logistic and exponential component based on log ratio modulation
-        losses = (
-            logistic_component * (1 - log_ratio_modulation)
-            + exp_component * log_ratio_modulation
-        )
+        losses = logistic_component * (1 - log_ratio_modulation) + exp_component * log_ratio_modulation
         return losses
 
     def policy_focused_loss(
@@ -489,9 +467,7 @@ class GPOTrainer(DPOTrainer):
         reference_rejected_logps: torch.FloatTensor,
     ) -> torch.FloatTensor:
         chosen_KL = (policy_chosen_logps - reference_chosen_logps).mean().clamp(min=0)
-        rejected_KL = (
-            (policy_rejected_logps - reference_rejected_logps).mean().clamp(min=0)
-        )
+        rejected_KL = (policy_rejected_logps - reference_rejected_logps).mean().clamp(min=0)
 
         chosen_logratios = policy_chosen_logps - reference_chosen_logps
         rejected_logratios = policy_rejected_logps - reference_rejected_logps
@@ -550,12 +526,8 @@ class GPOTrainer(DPOTrainer):
         policy_rejected_logps = policy_rejected_logps.to(self.accelerator.device)
         reference_chosen_logps = reference_chosen_logps.to(self.accelerator.device)
         reference_rejected_logps = reference_rejected_logps.to(self.accelerator.device)
-        chosen_rewards = (
-            self.beta * (policy_chosen_logps - reference_chosen_logps).detach()
-        )
-        rejected_rewards = (
-            self.beta * (policy_rejected_logps - reference_rejected_logps).detach()
-        )
+        chosen_rewards = self.beta * (policy_chosen_logps - reference_chosen_logps).detach()
+        rejected_rewards = self.beta * (policy_rejected_logps - reference_rejected_logps).detach()
         losses = self.gpo_loss(
             policy_chosen_logps,
             policy_rejected_logps,

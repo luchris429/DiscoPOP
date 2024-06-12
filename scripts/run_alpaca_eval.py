@@ -1,21 +1,13 @@
-import openai
-import torch
-import torch.nn.functional as F
-from typing import Dict
-import subprocess
-import wandb
-import json
-import sys
-import os
 import argparse
-import time
+import os
+import subprocess
 from datetime import datetime
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 
 def evaluate_gpo(model_id, alpaca_eval=False, alpaca_configs=None):
-
     alpaca_score = np.nan
     if alpaca_eval:
         print("Running Alpaca Eval")
@@ -78,9 +70,7 @@ def evaluate_gpo(model_id, alpaca_eval=False, alpaca_configs=None):
             )
         print("\n########## ALPACA EVAL ##########")
         alpaca_score = df_alpaca.loc[model_id, "win_rate"]
-        print(
-            f"{df_alpaca.loc[model_id, 'win_rate']:.3f} +- {df_alpaca.loc[model_id, 'standard_error']:.3f}"
-        )
+        print(f"{df_alpaca.loc[model_id, 'win_rate']:.3f} +- {df_alpaca.loc[model_id, 'standard_error']:.3f}")
 
     return True, alpaca_score
 
@@ -97,13 +87,9 @@ parser.add_argument(
     type=str,
     help="Your personal model ID, does not have to match the model path name",
 )
-parser.add_argument(
-    "--alpaca-eval", action="store_true", help="Whether to evaluate on Alpaca Eval 2.0"
-)
+parser.add_argument("--alpaca-eval", action="store_true", help="Whether to evaluate on Alpaca Eval 2.0")
 parser.add_argument("--no-logging", action="store_true")
-parser.add_argument(
-    "--csv-save-path", type=str, default="./", help="Path to save the CSV file"
-)
+parser.add_argument("--csv-save-path", type=str, default="./", help="Path to save the CSV file")
 parser.add_argument(
     "--alpaca-model",
     type=str,
@@ -159,9 +145,7 @@ if __name__ == "__main__":
 
     for i in range(args.num_generations):
         print(f"Iteration: {i}")
-        evaluated, val = evaluate_gpo(
-            model_id, alpaca_eval=args.alpaca_eval, alpaca_configs=alpaca_configs
-        )
+        evaluated, val = evaluate_gpo(model_id, alpaca_eval=args.alpaca_eval, alpaca_configs=alpaca_configs)
         if evaluated:
             alpaca_eval_values.append(val)
 

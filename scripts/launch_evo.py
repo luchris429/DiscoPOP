@@ -1,22 +1,23 @@
-import openai
-import torch
-import torch.nn.functional as F
-from typing import Dict
-import subprocess
-import wandb
-import json
-import sys
-import os
 import argparse
+import json
+import os
+import subprocess
 import time
 from datetime import datetime
+
 import pandas as pd
+import torch
+
+import openai
+import wandb
+
 
 gpt_model = "gpt4_20231230_1106preview"
 
 API_MAX_RETRY = 16
 API_RETRY_SLEEP = 10
 API_ERROR_OUTPUT = "$ERROR$"
+
 
 def init_archive(config):
     if config["B_PARAMS"] == 2:
@@ -236,9 +237,7 @@ def train_gpo(info, config):
         ]
 
     # Set environment variables directly in the subprocess call
-    env = dict(
-        os.environ, ACCELERATE_LOG_LEVEL="info"
-    )  # Copy current environment and add/modify
+    env = dict(os.environ, ACCELERATE_LOG_LEVEL="info")  # Copy current environment and add/modify
 
     # Execute the command
     result = subprocess.run(command, env=env)
@@ -248,7 +247,6 @@ def train_gpo(info, config):
 
 
 def evaluate_gpo(info, config):
-
     model_id = f"zephyr-{config['B_PARAMS']}b-g-{info['name']}"
     # Command to run the script using the specified Python interpreter
     command = [
@@ -319,9 +317,7 @@ def evaluate_gpo(info, config):
         result = subprocess.run(command, cwd=cwd)
         if result.returncode != 0:
             print("UPLOAD FAILED")
-            print(
-                f"Upload Model failed with return code: {result.returncode}\n{result.stderr}"
-            )
+            print(f"Upload Model failed with return code: {result.returncode}\n{result.stderr}")
 
     elif not model_score > 7.75:
         print("DELETING")
@@ -332,9 +328,7 @@ def evaluate_gpo(info, config):
         ]
         result = subprocess.run(command)
         if result.returncode != 0:
-            print(
-                f"Delete Model failed with return code: {result.returncode}\n{result.stderr}"
-            )
+            print(f"Delete Model failed with return code: {result.returncode}\n{result.stderr}")
 
     return True, model_score
 
@@ -349,7 +343,7 @@ parser.add_argument("--num-gpus", type=int, default=8)
 parser.add_argument("--b-params", type=int, default=7)
 parser.add_argument("--do-baselines", action="store_true", default=False)
 parser.add_argument("--resume", type=str, default=None)
-parser.add_argument("--llm-judge-dir". type=str, default="../FastChat/fastchat/llm_judge")
+parser.add_argument("--llm-judge-dir", type=str, default="../FastChat/fastchat/llm_judge")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -484,9 +478,7 @@ Please generate the next one.
         # VALIDATE CODE
         valid, error = validate_code(out["code"])
         if not valid:
-            next_prompt = (
-                f"Code not valid. Error:\n{error}\nPlease generate the next one."
-            )
+            next_prompt = f"Code not valid. Error:\n{error}\nPlease generate the next one."
             messages.append({"role": "user", "content": next_prompt})
             fitness = -1
             print("CODE NOT VALID")
@@ -496,9 +488,7 @@ Please generate the next one.
         # TRAIN GPO
         trained, error = train_gpo(out, config)
         if not trained:
-            next_prompt = (
-                f"Training failed. Error:\n{error}\nPlease generate the next one."
-            )
+            next_prompt = f"Training failed. Error:\n{error}\nPlease generate the next one."
             messages.append({"role": "user", "content": next_prompt})
             fitness = -1
             print("FAILED TRAINING")
@@ -508,9 +498,7 @@ Please generate the next one.
         # EVALUATE GPO
         evaluated, val = evaluate_gpo(out, config)
         if not evaluated:
-            next_prompt = (
-                f"Evaluation failed. Error:\n{val}\nPlease generate the next one."
-            )
+            next_prompt = f"Evaluation failed. Error:\n{val}\nPlease generate the next one."
             messages.append({"role": "user", "content": next_prompt})
             fitness = -1
             print("FAILED EVAL")

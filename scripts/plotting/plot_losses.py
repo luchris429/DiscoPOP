@@ -1,11 +1,12 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
-from matplotlib import cm
-import pandas as pd
+
 import seaborn as sn
-import numpy as np
 from bar_plot_alpaca_eval import configure_plotting_sn_params
+
+
 # plt.rcParams["font.family"] = "Times New Roman"
 # SCALE = 13
 SCALE = 11
@@ -13,9 +14,9 @@ SCALE = 11
 # SCALE = 8
 # HEIGHT_SCALE =0.8
 # HEIGHT_SCALE =0.5
-HEIGHT_SCALE =0.8
+HEIGHT_SCALE = 0.8
 LEGEND_Y_CORD = -1.2 * (HEIGHT_SCALE / 2.0)
-SUBPLOT_ADJUST = 1 / HEIGHT_SCALE  #-(0.05 + LEGEND_Y_CORD)
+SUBPLOT_ADJUST = 1 / HEIGHT_SCALE  # -(0.05 + LEGEND_Y_CORD)
 LEGEND_X_CORD = 0.45
 PLOT_FROM_CACHE = False
 PLOT_SAFTEY_MARGIN = 1.25
@@ -45,7 +46,7 @@ loss_names = {
     "aqfl": "AQFL",
     "cell": "CELL",
     "lrml": "LRML",
-    "pfl": "PFL"
+    "pfl": "PFL",
 }
 
 sn = configure_plotting_sn_params(sn, SCALE, HEIGHT_SCALE)
@@ -55,10 +56,10 @@ plt.gcf().subplots_adjust(bottom=0.40, left=0.2, top=0.95)
 # import numpy as np
 
 # Data for plotting
-# model_names = ['AlphaCode', 'Incoder', 'CodeGeex', 'CodeGeex-Mono', 'PaLM Coder', 
-#             'Codex', 
+# model_names = ['AlphaCode', 'Incoder', 'CodeGeex', 'CodeGeex-Mono', 'PaLM Coder',
+#             'Codex',
 # human_eval_scores = [17.1, 15.2, 17.6, 26.9, 32.9, 38.6, 47.0, 67.7, 65.8, 87.7]
-from matplotlib import cm
+
 import seaborn as sns
 
 
@@ -66,8 +67,9 @@ import seaborn as sns
 sns.set_style("whitegrid")
 
 
-
 beta = 0.05
+
+
 def performance_adaptive_decay_logistic_loss(logits: torch.Tensor) -> torch.FloatTensor:
     base_decay = 0.9
     mismatch_penalty = 0.5  # Penalty decay for mismatched choices
@@ -77,22 +79,23 @@ def performance_adaptive_decay_logistic_loss(logits: torch.Tensor) -> torch.Floa
     weighted_losses = adaptive_decay * -F.logsigmoid(beta * logits)
     return weighted_losses
 
+
 def logistic_log_loss(logits) -> torch.FloatTensor:
     losses = -F.logsigmoid(beta * logits)
     return losses
 
+
 def ipo_loss(logits) -> torch.FloatTensor:
-    
     losses = (logits - 1 / (2 * 0.1)) ** 2
     return losses
 
+
 def hinge_loss(logits) -> torch.FloatTensor:
-    losses = torch.relu(1 - beta* logits)
+    losses = torch.relu(1 - beta * logits)
     return losses
 
-def adaptive_quantile_loss(
-    logits: torch.Tensor
-) -> torch.FloatTensor:
+
+def adaptive_quantile_loss(logits: torch.Tensor) -> torch.FloatTensor:
     percentile = 0.5  # Start with the median quantile
     moving_quantile_weight = 0.01  # Weight for updating the moving quantile
 
@@ -101,14 +104,14 @@ def adaptive_quantile_loss(
     quantile_weights = torch.sigmoid(-beta * (logits - moving_quantile))
 
     logistic_losses = -F.logsigmoid(beta * logits)
-    hinge_losses = torch.relu(1 -beta * logits)
+    hinge_losses = torch.relu(1 - beta * logits)
 
     # Blend the logistic and hinge losses based on the dynamic quantile weight
     losses = quantile_weights * logistic_losses + (1 - quantile_weights) * hinge_losses
     return losses
 
-def combined_exp_logistic_loss(logits: torch.Tensor
-) -> torch.FloatTensor:
+
+def combined_exp_logistic_loss(logits: torch.Tensor) -> torch.FloatTensor:
     exp_losses = torch.exp(-beta * logits)
     log_losses = -F.logsigmoid(beta * logits)
     # Combine the losses with a tunable mixing coefficient
@@ -116,8 +119,8 @@ def combined_exp_logistic_loss(logits: torch.Tensor
     losses = alpha * exp_losses + (1 - alpha) * log_losses
     return losses
 
-def log_ratio_modulated_loss(logits: torch.Tensor
-    ) -> torch.FloatTensor:
+
+def log_ratio_modulated_loss(logits: torch.Tensor) -> torch.FloatTensor:
     # Modulate the mixing coefficient based on the log ratio magnitudes
     log_ratio_modulation = torch.sigmoid(logits)
     logistic_component = -F.logsigmoid(beta * logits)
@@ -126,8 +129,8 @@ def log_ratio_modulated_loss(logits: torch.Tensor
     losses = logistic_component * (1 - log_ratio_modulation) + exp_component * log_ratio_modulation
     return losses
 
-def policy_focused_loss(logits: torch.Tensor
-) -> torch.FloatTensor:
+
+def policy_focused_loss(logits: torch.Tensor) -> torch.FloatTensor:
     focus_scale = 2.0  # Scale to emphasize or de-emphasize based on the correctness of predictions
     is_correct = logits > 0
 
@@ -137,14 +140,14 @@ def policy_focused_loss(logits: torch.Tensor
     focused_loss = torch.where(
         is_correct,
         logistic_losses / focus_scale,  # De-emphasize correct predictions
-        hinge_losses * focus_scale   # Emphasize incorrect predictions
+        hinge_losses * focus_scale,  # Emphasize incorrect predictions
     )
     return focused_loss
 
-def dynamic_blended_adaptive_quantile_loss(
-    logits
-) -> torch.FloatTensor:
+
+def dynamic_blended_adaptive_quantile_loss(logits) -> torch.FloatTensor:
     import torch.nn.functional as F
+
     # Constants for the loss function
     starting_quantile = 0.5
     quantile_adapt_rate = 0.01
@@ -154,7 +157,7 @@ def dynamic_blended_adaptive_quantile_loss(
     logits_variability = logits.var()
 
     # Calculate an adaptive quantile based on a moving target
-    moving_quantile = starting_quantile + quantile_adapt_rate * (torch.sigmoid(logits.mean()) - starting_quantile)
+    starting_quantile + quantile_adapt_rate * (torch.sigmoid(logits.mean()) - starting_quantile)
 
     # Calculate dynamic blending coefficient based on logits variability
     dynamic_blend_coeff = torch.sigmoid(logits_variability) * dynamic_blend_rate
@@ -167,9 +170,8 @@ def dynamic_blended_adaptive_quantile_loss(
     losses = dynamic_blend_coeff * logistic_loss + (1 - dynamic_blend_coeff) * exp_loss
     return losses
 
-def adaptive_quantile_feedback_loss(
-    logits
-) -> torch.FloatTensor:
+
+def adaptive_quantile_feedback_loss(logits) -> torch.FloatTensor:
     import torch.nn.functional as F
 
     quantile_update_rate = 0.05
@@ -188,7 +190,6 @@ def adaptive_quantile_feedback_loss(
 
     losses = blend_rate * logistic_losses + (1 - blend_rate) * hinge_losses
     return losses
-
 
 
 # Generate logit values from -10 to 10
@@ -222,7 +223,6 @@ loss10 = adaptive_quantile_feedback_loss(logits)
 # }
 
 
-
 plt.figure(figsize=(SCALE, int(HEIGHT_SCALE * SCALE)))
 
 # Plot the results
@@ -237,27 +237,32 @@ plt.figure(figsize=(SCALE, int(HEIGHT_SCALE * SCALE)))
 # #plt.plot(logits, loss8, label='Policy Focused Loss')
 
 # plt.plot(logits, loss5, label='AQL')
-plt.plot(logits, loss10, label='AQFL', color=loss_colors["aqfl"])
-plt.plot(logits, loss4, label='PADLL', color=loss_colors["padll"])
-plt.plot(logits, loss7, label='LRML', color=loss_colors["lrml"])
-plt.plot(logits, loss1, label='DPO', color=loss_colors["dpo"])
-#plt.plot(logits, loss2, label='IPO')
-plt.plot(logits, loss3, label='SLiC', color=loss_colors["hinge"])
-#plt.plot(logits, loss9, label='New', color= other_colors[2],)
-#plt.plot(logits, loss8, label='Policy Focused Loss')
-plt.xlabel(r'Logits $\rho$')
-plt.ylabel(r'Loss $f(\rho)$')
-plt.title(f'Discovered Objective Functions')
-plt.legend(loc="lower center", bbox_to_anchor=(
-            LEGEND_X_CORD, LEGEND_Y_CORD), ncol=2, fancybox=True, shadow=True)
-plt.tight_layout()   
-plt.savefig(f'./plots/losses_function.png', bbox_inches='tight')
-plt.savefig(f'./plots/losses_function.pdf', bbox_inches='tight')
-print(f'./plots/losses_function.png')
+plt.plot(logits, loss10, label="AQFL", color=loss_colors["aqfl"])
+plt.plot(logits, loss4, label="PADLL", color=loss_colors["padll"])
+plt.plot(logits, loss7, label="LRML", color=loss_colors["lrml"])
+plt.plot(logits, loss1, label="DPO", color=loss_colors["dpo"])
+# plt.plot(logits, loss2, label='IPO')
+plt.plot(logits, loss3, label="SLiC", color=loss_colors["hinge"])
+# plt.plot(logits, loss9, label='New', color= other_colors[2],)
+# plt.plot(logits, loss8, label='Policy Focused Loss')
+plt.xlabel(r"Logits $\rho$")
+plt.ylabel(r"Loss $f(\rho)$")
+plt.title("Discovered Objective Functions")
+plt.legend(
+    loc="lower center",
+    bbox_to_anchor=(LEGEND_X_CORD, LEGEND_Y_CORD),
+    ncol=2,
+    fancybox=True,
+    shadow=True,
+)
+plt.tight_layout()
+plt.savefig("./plots/losses_function.png", bbox_inches="tight")
+plt.savefig("./plots/losses_function.pdf", bbox_inches="tight")
+print("./plots/losses_function.png")
 # plt.grid(True)
 # plt.savefig("loss_new.pdf",bbox_inches='tight')
 # plt.show()
-print('Done')
+print("Done")
 plt.clf()
 
 
@@ -266,11 +271,11 @@ logits = torch.arange(-10, 40, 0.01, dtype=torch.float, requires_grad=True)
 
 # Calculate losses for each function
 loss_functions = [
-    ('aqfl', adaptive_quantile_feedback_loss),
-    ('padll', performance_adaptive_decay_logistic_loss),
-    ('lrml', log_ratio_modulated_loss),
-    ('dpo', logistic_log_loss),
-    ('hinge', hinge_loss),
+    ("aqfl", adaptive_quantile_feedback_loss),
+    ("padll", performance_adaptive_decay_logistic_loss),
+    ("lrml", log_ratio_modulated_loss),
+    ("dpo", logistic_log_loss),
+    ("hinge", hinge_loss),
 ]
 
 # Colors for the gradients
@@ -297,17 +302,22 @@ for name, loss_fn in loss_functions:
     # plt.plot(logits.detach().numpy(), grad, label=name, color=color_mapping[name])
     plt.plot(logits.detach().numpy(), grad, label=loss_names[name], color=loss_colors[name])
 
-plt.xlabel(r'Logits $\rho$')
+plt.xlabel(r"Logits $\rho$")
 plt.ylabel(r"Gradient $f'(\rho)$")
-plt.title(r'Gradient of Objective Functions')
-plt.legend(loc="lower center", bbox_to_anchor=(
-            LEGEND_X_CORD, LEGEND_Y_CORD), ncol=2, fancybox=True, shadow=True)
+plt.title(r"Gradient of Objective Functions")
+plt.legend(
+    loc="lower center",
+    bbox_to_anchor=(LEGEND_X_CORD, LEGEND_Y_CORD),
+    ncol=2,
+    fancybox=True,
+    shadow=True,
+)
 plt.tight_layout()
-plt.savefig(f'./plots/losses_gradient.png', bbox_inches='tight')
-plt.savefig(f'./plots/losses_gradient.pdf', bbox_inches='tight')
-print(f'./plots/losses_gradient.png')
+plt.savefig("./plots/losses_gradient.png", bbox_inches="tight")
+plt.savefig("./plots/losses_gradient.pdf", bbox_inches="tight")
+print("./plots/losses_gradient.png")
 # plt.grid(True)
 # plt.savefig("loss_new.pdf",bbox_inches='tight')
 # plt.show()
-print('Done')
+print("Done")
 plt.clf()

@@ -19,7 +19,12 @@ from datasets import load_dataset
 
 
 # HumanEval solutions that are considered simple/generic enough to be kept in the training dataset
-HUMAN_EVAL_STRINGS_OK = ["return x + y", "return len(string)", "return n**2", "return " ".join(strings)"]
+HUMAN_EVAL_STRINGS_OK = [
+    "return x + y",
+    "return len(string)",
+    "return n**2",
+    "return " ".join(strings)",
+]
 
 
 def extract_docstring(prompt: str) -> str:
@@ -65,7 +70,9 @@ def normalize_whitespace(text: str) -> str:
 
 
 def decontaminate_humaneval(
-    samples: List[Dict[str, Any]], text_column: str = "text", filter_out: Dict[str, List[str]] = FILTER_OUT
+    samples: List[Dict[str, Any]],
+    text_column: str = "text",
+    filter_out: Dict[str, List[str]] = FILTER_OUT,
 ) -> List[Dict[str, Any]]:
     """
     filter_out: Dict[str, List[str]] mapping from benchmark name to list of strings that need to be

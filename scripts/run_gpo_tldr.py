@@ -13,13 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
-import random
-import sys
 import json
+import logging
+import sys
 
 import torch
-import torch.nn.functional as F
 import transformers
 from transformers import AutoModelForCausalLM, set_seed
 
@@ -53,9 +51,8 @@ def main():
     else:
         size = "7b"
     with open(f"recipes/zephyr-{size}-gemma/gpo/tests.json", "r") as f:
-        info = json.load(f)
+        json.load(f)
     print(f"RUNNING: {training_args.loss_type}")
-
 
     #######
     # Setup
@@ -72,9 +69,9 @@ def main():
     transformers.utils.logging.enable_explicit_format()
 
     # Log on each process the small summary:
-    #logger.info(f"Model parameters {model_args}")
-    #logger.info(f"Data parameters {data_args}")
-    #logger.info(f"Training/evaluation parameters {training_args}")
+    # logger.info(f"Model parameters {model_args}")
+    # logger.info(f"Data parameters {data_args}")
+    # logger.info(f"Training/evaluation parameters {training_args}")
 
     # Check for last checkpoint
     last_checkpoint = get_checkpoint(training_args)
@@ -104,25 +101,31 @@ def main():
     #####################################
     data_args.truncation_side = "left"  # Truncate from left to ensure we don't lose labels in final turn
     tokenizer = get_tokenizer(model_args, data_args)
-    
+
     #####################
     # Make changes to dataset to fit OpenAI scheme
     #####################
     def carperAI2openAI(example):
-        prompt = f"example['prompt']\n\nTL;DR:"
+        prompt = "example['prompt']\n\nTL;DR:"
         old_chosen = example["chosen"]
         old_rejected = example["rejected"]
-        
-        chosen = [{"content": prompt, "role": "user" } , {"content": old_chosen, "role": "assistant" }]
-        rejected = [{"content": prompt, "role": "user" } , { "content": old_rejected, "role": "assistant" }]
-        
+
+        chosen = [
+            {"content": prompt, "role": "user"},
+            {"content": old_chosen, "role": "assistant"},
+        ]
+        rejected = [
+            {"content": prompt, "role": "user"},
+            {"content": old_rejected, "role": "assistant"},
+        ]
+
         new_example = {
             "chosen": chosen,
             "rejected": rejected,
         }
-        
+
         return new_example
-    
+
     raw_datasets = raw_datasets.map(
         carperAI2openAI,
         num_proc=data_args.preprocessing_num_workers,
@@ -143,7 +146,7 @@ def main():
         remove_columns=column_names,
         desc="Formatting comparisons with prompt template",
     )
-    
+
     # Reduce dataset
     # raw_datasets = raw_datasets.filter(lambda x: len(x["text_prompt"]) < 450, batched=False)
 
@@ -163,11 +166,15 @@ def main():
     logger.info(
         f"Decontaminated {num_filtered_train_samples} ({num_filtered_train_samples/num_raw_train_samples * 100:.2f}%) samples from the training set."
     )
-    
+
     # Replace column names with what TRL needs, text_chosen -> chosen and text_rejected -> rejected
     for split in ["train", "test"]:
         raw_datasets[split] = raw_datasets[split].rename_columns(
-            {"text_prompt": "prompt", "text_chosen": "chosen", "text_rejected": "rejected"}
+            {
+                "text_prompt": "prompt",
+                "text_chosen": "chosen",
+                "text_rejected": "rejected",
+            }
         )
 
     # Log a few random samples from the training set:
@@ -175,7 +182,6 @@ def main():
     #     logger.info(f"Prompt sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['prompt']}")
     #     logger.info(f"Chosen sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['chosen']}")
     #     logger.info(f"Rejected sample {index} of the raw training set:\n\n{raw_datasets['train'][index]['rejected']}")
-        
 
     torch_dtype = (
         model_args.torch_dtype if model_args.torch_dtype in ["auto", None] else getattr(torch, model_args.torch_dtype)

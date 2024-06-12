@@ -1,21 +1,12 @@
-import openai
-import torch
-import torch.nn.functional as F
-from typing import Dict
-import subprocess
-import wandb
-import json
-import sys
-import os
 import argparse
-import time
+import os
+import subprocess
 from datetime import datetime
+
 import pandas as pd
-import numpy as np
 
 
 def evaluate_gpo(model_id, model_path, config):
-
     print("Running MT Bench")
     command = [
         "python",
@@ -55,9 +46,7 @@ def evaluate_gpo(model_id, model_path, config):
             False,
             f"Gen Judgemnt failed with return code: {result.returncode}\n{result.stderr}",
         )
-    input_file = (
-        "../FastChat/fastchat/llm_judge/data/mt_bench/model_judgment/gpt-4_single.jsonl"
-    )
+    input_file = "../FastChat/fastchat/llm_judge/data/mt_bench/model_judgment/gpt-4_single.jsonl"
 
     print(f"Input file: {input_file}")
     df_all = pd.read_json(input_file, lines=True)
@@ -99,16 +88,10 @@ parser.add_argument(
     type=str,
     help="Model path, either to directory where the weights are saved or to a HF repo",
 )
-parser.add_argument(
-    "--mt-bench", action="store_true", help="Whether to evaluate on MT Bench"
-)
+parser.add_argument("--mt-bench", action="store_true", help="Whether to evaluate on MT Bench")
 parser.add_argument("--no-logging", action="store_true")
-parser.add_argument(
-    "--csv-save-path", type=str, default="./", help="Path to save the CSV file"
-)
-parser.add_argument(
-    "--max-new-token", type=int, help="Max number of tokens to generate"
-)
+parser.add_argument("--csv-save-path", type=str, default="./", help="Path to save the CSV file")
+parser.add_argument("--max-new-token", type=int, help="Max number of tokens to generate")
 
 
 if __name__ == "__main__":
@@ -127,7 +110,6 @@ if __name__ == "__main__":
         "NOW": now,
         "NUM_GPUS": args.num_gpus,
         "MAX_NEW_TOKEN": args.max_new_token,
-        "NUM_GENERATIONS": args.num_generations,
     }
 
     mt_bench_values = []
@@ -147,9 +129,5 @@ if __name__ == "__main__":
             mt_bench_values.append(val)
 
         df = pd.DataFrame({"mt_bench": mt_bench_values})
-        df.to_csv(
-            f"{csv_save_path}/mt_bench_scores_{model_id}-{str(args.max_new_token)}.csv"
-        )
-        print(
-            f"Saved to {csv_save_path}/mt_bench_scores_{model_id}-{str(args.max_new_token)}.csv"
-        )
+        df.to_csv(f"{csv_save_path}/mt_bench_scores_{model_id}-{str(args.max_new_token)}.csv")
+        print(f"Saved to {csv_save_path}/mt_bench_scores_{model_id}-{str(args.max_new_token)}.csv")
