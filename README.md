@@ -1,6 +1,6 @@
 # Discovering Preference Optimization Algorithms with and for Large Language Models
 
-🤗 [Model](https://huggingface.co/SakanaAI/DiscoPOP-zephyr-7b-gemma) | 📚 [Paper](https://arxiv.org/abs/2406.08414) | 📝 [Blog](https://sakana.ai/)
+🤗 [Model](https://huggingface.co/SakanaAI/DiscoPOP-zephyr-7b-gemma) | 📚 [Paper](https://arxiv.org/abs/2406.08414) | 📝 [Blog](https://sakana.ai/llm-squared)
 
 
 <div align="center">
