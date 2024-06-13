@@ -129,7 +129,7 @@ source scripts/train_eval_imdb.sh
 @article{lu2024discopop,
   title={Discovering Preference Optimization Algorithms with and for Large Language Models},
   author={Lu, Chris and Holt, Samuel and Fanconi, Claudio and Chan, Alex J and Foerster, Jakob and van der Schaar, Mihaela and Lange, Robert Tjarko},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  journal={arXiv preprint arXiv:2406.08414},
   year={2024}
 }
 ```
